@@ -112,7 +112,7 @@ async function accountsView(root, params) {
     ...[['xtream', 'Xtream Codes'], ['m3u', t('قائمة M3U')]].map(([k, label]) =>
       h(`button.seg-btn.focusable${mode === k ? '.on' : ''}`, { type: 'button', role: 'tab', 'aria-selected': String(mode === k), 'data-key': `mode:${k}`,
         onclick: () => mode !== k && Router.go('accounts', { add: true, mode: k }, { replace: true }) }, label)));
-  // Re-enter the password of a saved account (e.g. after the app was renamed to KLABYTV).
+  // Re-enter the password of a saved account the OS keychain can't decrypt anymore.
   const reauth = params.reauth && S.accounts.find((a) => a.id === params.reauth);
   if (reauth) {
     server.input.value = reauth.server;
@@ -189,7 +189,7 @@ async function accountsView(root, params) {
     h('form.auth-card', { onsubmit: onSubmit },
       h('h1', reauth ? t('أدخل كلمة المرور') : t('تسجيل الدخول')),
       reauth ? null : tabs,
-      h('p.muted', reauth ? t('البرنامج بقى اسمه {0} — محتاجين كلمة مرور «{1}» مرة واحدة بس.', [APP_NAME, reauth.name]) : t('اشتراك Xtream Codes')),
+      h('p.muted', reauth ? t('محتاجين كلمة مرور «{0}» تاني — المحفوظة على الجهاز ده مش بتتقري.', [reauth.name]) : t('اشتراك Xtream Codes')),
       server.el, user.el, pass.el, name.el,
       reauth ? null : h('div.or', h('span', t('أو'))),
       reauth ? null : m3u.el,

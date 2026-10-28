@@ -5,132 +5,129 @@
 <h1 align="center">KLABYTV</h1>
 
 <p align="center">
-  مشغل IPTV بواجهة شبه Netflix — للماك والويندوز وأندرويد وأندرويد TV<br/>
-  An IPTV player with a Netflix-style interface — for Mac, Windows, Android and Android TV
+  An IPTV player with a Netflix-style interface — for Mac, Windows, Android and Android TV<br/>
+  <b>v1.0.0-alpha</b>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Shaf31/KLABYTV/releases/latest"><b>⬇ التحميل · Download</b></a>
+  <a href="https://github.com/Shaf31/KLABYTV/releases/latest"><b>⬇ Download</b></a> · <a href="about.ar.md">العربية</a>
 </p>
 
 ---
 
-## البرنامج ده إيه؟
+> [!IMPORTANT]
+> **KLABYTV is a player, not a service.**
+> It doesn't include, sell or provide any channels, movies or subscriptions, and it doesn't work as a server by itself.
+> To watch anything you need your own IPTV subscription from a provider, in one of these forms:
+> - an **M3U / M3U8 playlist link**, or an `.m3u` file;
+> - **Xtream Codes** details: server address, username and password.
 
-KLABYTV برنامج تتفرج بيه على اشتراك الـ IPTV بتاعك (قنوات مباشرة، أفلام، مسلسلات) بواجهة سهلة شبه Netflix، وبيوريك بالظبط استهلكت إنترنت قد إيه في كل حاجة اتفرجت عليها.
+## What is KLABYTV?
 
-- بيشتغل مع اشتراكات **Xtream Codes** وقوايم **M3U** (رابط أو ملف من الجهاز).
-- **عربي وإنجليزي**: بيمشي على لغة الجهاز، وتقدر تغيّرها من الإعدادات.
-- **مشغل داخلي لكل الصيغ**: مش محتاج VLC ولا أي برنامج تاني. الصيغ الصعبة (MKV، صوت AC3/DTS، HEVC) بتتحول وهي شغالة جوه البرنامج.
-- **عداد استهلاك** لكل جهاز لوحده، ووضع **توفير الاستهلاك**.
-- بيتحكم فيه **بالكيبورد والماوس** على الكمبيوتر، **باللمس** على الموبايل، و**بالريموت** على التلفزيون.
+KLABYTV plays your IPTV subscription (live channels, movies and series) in an easy, Netflix-style interface, and shows exactly how much internet data everything you watched used.
 
-## التحميل
+- Works with **Xtream Codes** accounts and **M3U / M3U8** playlists (a link or a file from your device).
+- **English and Arabic**: it follows your device language, and you can change it in the settings.
+- **Built-in player for every format**: no VLC or any other app needed. Hard formats (MKV, AC3/DTS audio, HEVC) are converted on the fly inside the app.
+- **Data usage counter** for each device on its own, and a **data saver** mode.
+- Control it with the **keyboard and mouse** on a computer, **touch** on a phone, and the **remote** on a TV.
 
-من صفحة [Releases](https://github.com/Shaf31/KLABYTV/releases/latest):
+## Download
 
-| الجهاز | الملف |
+From the [Releases](https://github.com/Shaf31/KLABYTV/releases/latest) page:
+
+| Device | File |
 |---|---|
-| ماك (Apple Silicon و Intel) | `KLABYTV-…-mac-universal.zip` |
-| ويندوز (64-bit) | `KLABYTV-…-win.zip` |
-| موبايل أندرويد | `KLABYTV-…-android-phone.apk` |
-| أندرويد TV / تي في بوكس / تابلت | `KLABYTV-…-android-tv-tablet.apk` |
-| ملف M3U للتجربة | `KLABYTV-sample.m3u` |
+| Mac (Apple Silicon and Intel) | `KLABYTV-1.0.0-alpha-mac-universal.zip` |
+| Windows (64-bit) | `KLABYTV-1.0.0-alpha-win.zip` |
+| Android phone | `KLABYTV-1.0.0-alpha-android-phone.apk` |
+| Android TV / TV box / tablet | `KLABYTV-1.0.0-alpha-android-tv-tablet.apk` |
+| Sample M3U playlist for testing | `KLABYTV-sample.m3u` |
 
-## التسطيب
+> This is an **alpha**: the first public version. Some things may not work as expected yet. Please report problems in [Issues](https://github.com/Shaf31/KLABYTV/issues).
 
-### ماك
-1. فك ضغط الملف وانقل `KLABYTV.app` لفولدر **Applications**.
-2. البرنامج مش متوقّع من Apple، فنفّذ الأمر ده مرة واحدة في **Terminal** (من غيره الماك هيقول إن البرنامج "damaged"):
+## Installation
+
+### Mac
+1. Unzip the file and move `KLABYTV.app` to your **Applications** folder.
+2. The app isn't signed by Apple, so run this once in **Terminal** (without it, macOS says the app is "damaged"):
    ```bash
    xattr -cr "/Applications/KLABYTV.app" && codesign --force -s - "/Applications/KLABYTV.app/Contents/Resources/ffmpeg/ffmpeg" && codesign --force --deep -s - "/Applications/KLABYTV.app"
    ```
-3. افتح البرنامج عادي.
+3. Open the app as usual.
 
-### ويندوز
-1. فك الضغط في أي فولدر وشغّل `KLABYTV.exe`.
-2. لو ظهرت رسالة **Windows protected your PC**: دوس **More info** وبعدين **Run anyway** (البرنامج مش متوقّع).
+### Windows
+1. Unzip the file anywhere and run `KLABYTV.exe`.
+2. If **Windows protected your PC** appears, click **More info**, then **Run anyway** (the app isn't signed).
 
-### أندرويد
-- **الموبايل**: `android-phone.apk` (اسمه KLABYTV)، بواجهة لمس.
-- **التلفزيون والتابلت**: `android-tv-tablet.apk` (اسمه KLABYTV TV). على التلفزيون بيظهر في قايمة التطبيقات وبيشتغل بالريموت، وعلى التابلت نفس الواجهة الكبيرة باللمس.
-- تقدر تسطّب الاتنين على نفس الجهاز.
-- انقل الملف للجهاز وافتحه، ووافق على **التثبيت من مصادر غير معروفة**. على التي في بوكس استخدم تطبيق **Downloader** أو فلاشة.
+### Android
+- **Phone**: `android-phone.apk` (named KLABYTV), with a touch layout.
+- **TV and tablet**: `android-tv-tablet.apk` (named KLABYTV TV). On a TV it appears in the app list and works with the remote. On a tablet it's the same large layout, with touch.
+- Both can be installed on the same device.
+- Copy the file to the device, open it, and allow **Install from unknown sources**. On a TV box, use the **Downloader** app or a USB stick.
 
-## الاستخدام
+## How to use it
 
-### 1. إضافة حساب
-أول ما تفتح البرنامج هتلاقي شاشة **تسجيل الدخول** وفيها اختيارين:
+### 1. Add your subscription
+The first time you open the app you'll see the **Sign in** screen, with two options:
 
-- **Xtream Codes**: اكتب عنوان السيرفر مع البورت (مثلًا `http://example.com:8080`) واسم المستخدم وكلمة المرور. ولو معاك رابط `get.php` الصقه وهو هيطلّع البيانات لوحده.
-- **قائمة M3U**: الصق رابط القائمة، أو دوس **«اختار ملف من الجهاز»** واختار ملف `.m3u`.
-  - البرنامج بيقسّم القائمة لوحده لقنوات وأفلام ومسلسلات، والحلقات بتتجمع بالمواسم من أسماء زي `S01E02`.
-  - لو القائمة فيها رابط دليل برامج (XMLTV)، هيظهرلك البرنامج الحالي والجاي على كل قناة.
-  - مش معاك قائمة؟ جرّب بملف `KLABYTV-sample.m3u` اللي في صفحة التحميل.
+- **Xtream Codes**: enter the server address with its port (for example `http://example.com:8080`), your username and password. If you have a `get.php` link instead, paste it and the details are filled in for you.
+- **M3U playlist**: paste the playlist link (M3U / M3U8), or tap **"Choose a file from this device"** and pick an `.m3u` file.
+  - The app splits the playlist into channels, movies and series by itself. Episodes are grouped by season from names like `S01E02`.
+  - If the playlist includes a TV guide link (XMLTV), you'll see what's on now and next on each channel.
+  - No playlist yet? Try the app with `KLABYTV-sample.m3u` from the download page. It contains public test streams only.
 
-تقدر تضيف أكتر من حساب، وتختار بينهم من شاشة **«مين بيتفرج؟»**.
+You can add several accounts and switch between them on the **"Who's watching?"** screen.
 
-### 2. التصفح
-- **الرئيسية**: كمّل مشاهدة، القنوات اللي شفتها مؤخرًا، قائمتي، أحدث الأفلام والمسلسلات، وصف لكل قسم.
-- **البث المباشر / الأفلام / المسلسلات**: بالأقسام.
-- **قائمتي**: اضغط **F** (أو زرار **+**) على أي فيلم أو مسلسل أو قناة علشان تضيفه.
-- **البحث**: اضغط **/** أو أيقونة البحث.
+### 2. Browsing
+- **Home**: continue watching, recently watched channels, My List, newest movies and series, and a row for each category.
+- **Live TV / Movies / Series**: by category.
+- **My List**: press **F** (or the **+** button) on any movie, series or channel to add it.
+- **Search**: press **/** or the search icon.
 
-### 3. المشغل
-| الأمر | الكيبورد والماوس | اللمس |
+### 3. The player
+| Action | Keyboard and mouse | Touch |
 |---|---|---|
-| تشغيل / إيقاف | Space أو كليك | الزرار الكبير في النص |
-| تقديم / تأخير | ← → أو دبل كليك على يمين/شمال الشاشة | دبل تاب على يمين/شمال الشاشة |
-| القناة اللي بعدها / قبلها | ↑ ↓ | — |
-| ملء الشاشة | F أو دبل كليك في النص | — |
-| الصوت | + / − أو عجلة الماوس | — |
-| اختيار الجودة | Q | زرار الجودة |
-| عداد الاستهلاك | I | زرار العداد |
-| وضع التوافق | C | زرار التوافق |
-| رجوع | Esc / Backspace / زرار الماوس الخلفي | زرار الرجوع |
+| Play / pause | Space or click | The big button in the middle |
+| Skip forward / back | ← → or double-click on the right / left of the screen | Double tap on the right / left of the screen |
+| Next / previous channel | ↑ ↓ | — |
+| Full screen | F or double-click in the middle | — |
+| Volume | + / − or the mouse wheel | — |
+| Choose quality | Q | Quality button |
+| Data counter | I | Counter button |
+| Compatibility mode | C | Compatibility button |
+| Back | Esc / Backspace / mouse back button | Back button |
 
-- الأفلام والحلقات بتكمّل من مكان ما وقفت.
-- مدة التقديم والتأخير بتتغير من الإعدادات (5 ثواني لحد 5 دقايق).
-- لو الصيغة مش مدعومة، البرنامج بيحوّلها لوحده (**وضع التوافق**) أو بيفتحها في مشغل أندرويد الأصلي.
+- Movies and episodes resume from where you stopped.
+- The skip step can be changed in the settings (5 seconds up to 5 minutes).
+- If a format isn't supported, the app converts it by itself (**compatibility mode**) or opens it in the native Android player.
+- Live channels can't be skipped forward or back: the server sends them as they air.
 
-### 4. استهلاك الإنترنت
-- أثناء المشاهدة: السرعة، الاستهلاك، والمدة فوق الفيديو (تقدر تخفيه من الإعدادات أو بزرار **I**).
-- صفحة **«الاستهلاك»**: النهارده، امبارح، آخر 7 أيام، آخر 30 يوم، الشهر الحالي أو فترة تختارها. فيها رسم بياني يومي وجدول بكل مرة اتفرجت فيها: المدة، الاستهلاك، ومتوسط السرعة.
-- الاستهلاك بيتحسب **لكل جهاز لوحده**، واسم الجهاز بيتغير من الإعدادات.
+### 4. Data usage
+- While watching: speed, data used and time watched, shown over the video. You can hide it in the settings or with **I**.
+- The **"Data usage"** page: today, yesterday, last 7 days, last 30 days, this month, or a range you choose. It has a daily chart and a table of every viewing session: duration, data used and average speed.
+- Usage is counted **per device**, and the device name can be changed in the settings.
 
-### 5. توفير الاستهلاك (من الإعدادات)
-- **اختيار الجودة**: لو القناة أو الفيلم موجودين بأكتر من جودة، تختار الأقل، وجنب كل جودة استهلاكها في الساعة.
-- **مدة البافر**: البرنامج بيحمّل قدامك المدة دي بس (30 ثانية لحد 5 دقايق)، مش الفيلم كله.
-- **لسه بتتفرج؟**: لو مفيش أي حركة لمدة ساعة أو اتنين أو أكتر، التشغيل بيقف وبيسألك.
-- **وقف التشغيل لما البرنامج يتصغّر**، وبيكمّل لوحده لما ترجعله.
+### 5. Data saver (in the settings)
+- **Quality choice**: when a channel or movie exists in several qualities, pick a lower one. Each quality shows its data per hour.
+- **Buffer length**: the app only downloads that far ahead (30 seconds up to 5 minutes), not the whole movie.
+- **Still watching?**: after an hour or more with no activity, playback stops and asks you.
+- **Stop playback when the app is minimized**: it resumes by itself when you come back.
 
-### 6. اللغة
-من **الإعدادات ← اللغة**: تلقائي (زي لغة الجهاز) أو العربية أو English. التغيير بيحصل على طول.
+### 6. Language
+In **Settings → Language**: Automatic (same as the device), English, or العربية. The change applies right away.
 
-## أسئلة
+## FAQ
 
-**القناة مش شغالة؟**
-جرّب صيغة البث التانية (TS / HLS) من زرار **TS/HLS** في المشغل أو من الإعدادات، أو غيّر الـ User-Agent من **الإعدادات ← متقدم**. وتأكد إن اشتراكك فعال وإنك مش فاتح على أجهزة أكتر من المسموح.
+**Does KLABYTV give me channels?**
+No. KLABYTV is only a player. It doesn't come with any content and it can't work as a server. You need an M3U / M3U8 link or Xtream Codes details from your IPTV provider.
 
-**بياناتي محفوظة فين؟**
-على جهازك بس. الحسابات والمفضلة وسجل الاستهلاك مش بتتبعت لأي حد، وكلمات المرور متشفرة بخزنة النظام (Keychain / DPAPI / Android Keystore).
+**A channel doesn't play?**
+Try the other stream format with the **TS/HLS** button in the player or in the settings, or change the User-Agent in **Settings → Advanced**. Also make sure your subscription is active and that you aren't connected on more devices than it allows.
 
-**البرنامج بيوفّر قنوات أو اشتراكات؟**
-لأ. KLABYTV مشغل بس، ومش جواه أي محتوى. محتاج يكون عندك اشتراك من مزود خدمة.
+**Where is my data stored?**
+Only on your device. Accounts, favorites and usage history aren't sent anywhere, and passwords are encrypted with the system's secure storage (Keychain / DPAPI / Android Keystore).
 
 ---
 
-## English
-
-**KLABYTV** is an IPTV player with a Netflix-style interface for **macOS (universal), Windows, Android phones and Android TV / tablets**.
-
-- **Sources:** Xtream Codes accounts, and M3U playlists from a link or a file. Playlists are split into channels, movies and series, and episodes are grouped by season. The XMLTV guide loads when the playlist links one.
-- **Built-in player for every format:** MPEG-TS, HLS and MP4 play directly. MKV, AC3/DTS audio and HEVC are converted on the fly by the bundled ffmpeg, or opened in the native Android player.
-- **Data usage:** every byte is counted per device, with live speed in the player and daily charts and a session history on the usage page.
-- **Data saver:** quality picker with data per hour, a fixed buffer for movies, "Still watching?" and pausing while minimized.
-- **Controls:** keyboard and mouse, including mouse back/forward buttons; touch, with double tap to seek; TV remote.
-- **Arabic and English:** follows the device language and can be changed in the settings.
-
-Downloads are on the [Releases](https://github.com/Shaf31/KLABYTV/releases/latest) page. See [README.md](README.md) to build from source.
-
-KLABYTV is a player only. It doesn't include any channels or content.
+To build from source, see [README.md](README.md).

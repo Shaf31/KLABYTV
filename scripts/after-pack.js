@@ -22,7 +22,7 @@ exports.default = async function afterPack(context) {
 
   const [vi] = ResEdit.Resource.VersionInfo.fromEntries(res.entries);
   if (vi) {
-    const [major, minor, patch] = version.split('.').map(Number);
+    const [major, minor, patch] = version.split(/[.-]/).map(Number); // 1.0.0-alpha -> 1, 0, 0
     vi.setFileVersion(major, minor, patch, 0, lang);
     vi.setProductVersion(major, minor, patch, 0, lang);
     for (const l of vi.getAllLanguagesForStringValues()) {

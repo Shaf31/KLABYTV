@@ -24,27 +24,9 @@ const DEFAULT_SETTINGS = {
 };
 
 const APP_NAME = 'KLABYTV';
-const OLD_DATA_DIR_NAMES = ['Nile IPTV Player'];
 
 function defaultDeviceName() {
   return os.hostname().replace(/\.local$/i, '').replace(/[-_]+/g, ' ').trim() || 'هذا الجهاز';
-}
-
-// The app used to be called "Nile IPTV Player": bring its accounts, favorites, usage history and
-// local storage (resume points, continue watching) over on first start under the new name.
-function migrateOldData(dir) {
-  if (fs.existsSync(path.join(dir, 'settings.json'))) return;
-  for (const name of OLD_DATA_DIR_NAMES) {
-    const old = path.join(app.getPath('appData'), name);
-    if (!fs.existsSync(path.join(old, 'settings.json'))) continue;
-    fs.mkdirSync(dir, { recursive: true });
-    for (const f of ['settings.json', 'accounts.json', 'favorites.json', 'usage.json']) {
-      if (fs.existsSync(path.join(old, f))) fs.copyFileSync(path.join(old, f), path.join(dir, f));
-    }
-    const ls = path.join(old, 'Local Storage');
-    if (fs.existsSync(ls)) fs.cpSync(ls, path.join(dir, 'Local Storage'), { recursive: true });
-    return;
-  }
 }
 
 let win, settings, accounts, favorites, usage, proxy, transcoder;
@@ -57,7 +39,7 @@ function encrypt(text) {
   if (safeStorage.isEncryptionAvailable()) return 'enc:' + safeStorage.encryptString(text).toString('base64');
   return 'raw:' + Buffer.from(text, 'utf8').toString('base64');
 }
-// After the rename, passwords saved with the old app's keychain key can't be read anymore:
+// A password the OS keychain can't decrypt anymore (e.g. data copied from another computer):
 // the renderer then asks for the password again (NEED_PASSWORD) and keeps the same account.
 function decrypt(value) {
   try {
@@ -344,7 +326,6 @@ function createWindow() {
 
 app.whenReady().then(async () => {
   const dir = app.getPath('userData');
-  try { migrateOldData(dir); } catch (e) { console.error('migration failed', e); }
   settings = new JsonStore(path.join(dir, 'settings.json'), { ...DEFAULT_SETTINGS });
   if (!settings.data.deviceName) settings.data.deviceName = defaultDeviceName();
   accounts = new JsonStore(path.join(dir, 'accounts.json'), { list: [] });

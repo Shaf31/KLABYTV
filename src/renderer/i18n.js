@@ -78,7 +78,7 @@ const EN = {
   "تم استخراج البيانات من الرابط": "Details filled in from the link",
   "جاري الاتصال بالسيرفر…": "Connecting to the server…",
   "أدخل كلمة المرور": "Enter your password",
-  "البرنامج بقى اسمه {0} — محتاجين كلمة مرور «{1}» مرة واحدة بس.": "The app is now called {0} — we need the password for “{1}” one more time.",
+  "محتاجين كلمة مرور «{0}» تاني — المحفوظة على الجهاز ده مش بتتقري.": "Please enter the password for “{0}” again — the one saved on this device can't be read.",
   "اشتراك Xtream Codes": "Xtream Codes subscription",
   "أو": "or",
   "رجوع للحسابات": "Back to accounts",
