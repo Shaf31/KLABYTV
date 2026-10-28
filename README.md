@@ -111,7 +111,6 @@ Third-party parts keep their own licenses:
 - [hls.js](https://github.com/video-dev/hls.js) and [mpegts.js](https://github.com/xqq/mpegts.js): Apache-2.0.
 - [AndroidX Media3](https://github.com/androidx/media): Apache-2.0. [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd): BSD-3-Clause.
 - [FFmpeg](https://ffmpeg.org), bundled in the Mac and Windows builds only (not in this repository): LGPL / GPL. Its license file ships next to it in each build.
-- The Shoor font (`src/renderer/fonts/Shoor.ttf`) isn't covered by the MIT License and remains under its own license.
 
 ## Project structure
 ```
