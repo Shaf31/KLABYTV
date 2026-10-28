@@ -105,6 +105,15 @@ npm start
 - Passwords are encrypted with the system's secure storage (Windows DPAPI / macOS Keychain / Android Keystore).
 - KLABYTV is a player only: it doesn't include any channels or content, and it isn't a server. You need an M3U / M3U8 link or Xtream Codes details from your provider.
 
+## License
+KLABYTV is released under the [MIT License](LICENSE).
+
+Third-party parts keep their own licenses:
+- [hls.js](https://github.com/video-dev/hls.js) and [mpegts.js](https://github.com/xqq/mpegts.js): Apache-2.0.
+- [AndroidX Media3](https://github.com/androidx/media): Apache-2.0. [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd): BSD-3-Clause.
+- [FFmpeg](https://ffmpeg.org), bundled in the Mac and Windows builds only (not in this repository): LGPL / GPL. Its license file ships next to it in each build.
+- The Shoor font (`src/renderer/fonts/Shoor.ttf`) isn't covered by the MIT License and remains under its own license.
+
 ## Project structure
 ```
 android/               Android app: the same interface in a WebView + a Java port of the proxy and usage tracking (android/app/src/main/java/tv/klabytv/core)

@@ -99,5 +99,6 @@
     },
     "afterPack": "scripts/after-pack.js"
   },
-  "author": "KLABYTV"
+  "author": "Shaf31",
+  "license": "MIT"
 }

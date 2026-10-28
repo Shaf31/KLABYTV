@@ -95,6 +95,15 @@ npm start
   - Linux: `~/.config/KLABYTV`
 - الباسوردات متشفرة بخزنة النظام (Windows DPAPI / macOS Keychain / Android Keystore).
 
+## الرخصة
+KLABYTV متاح برخصة [MIT](LICENSE).
+
+الأجزاء الخارجية ليها رخصها الخاصة:
+- [hls.js](https://github.com/video-dev/hls.js) و [mpegts.js](https://github.com/xqq/mpegts.js): Apache-2.0.
+- [AndroidX Media3](https://github.com/androidx/media): Apache-2.0. [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd): BSD-3-Clause.
+- [FFmpeg](https://ffmpeg.org)، موجود في نسخ الماك والويندوز بس (مش في الريبو): LGPL / GPL، وملف الرخصة بتاعه موجود جنبه في كل نسخة.
+- خط Shoor (`src/renderer/fonts/Shoor.ttf`) مش داخل في رخصة MIT، وليه رخصته الخاصة.
+
 ## هيكل المشروع
 ```
 android/               تطبيق أندرويد: نفس الواجهة في WebView + نسخة Java من البروكسي والاستهلاك (android/app/src/main/java/tv/klabytv/core)
