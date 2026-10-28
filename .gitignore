@@ -1,0 +1,12 @@
+node_modules/
+dist/
+vendor/
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+
+# Android signing key: never commit
+android/keystore/
+android/keystore.properties
+*.jks

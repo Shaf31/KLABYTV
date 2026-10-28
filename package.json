@@ -1,0 +1,103 @@
+{
+  "name": "klabytv",
+  "productName": "KLABYTV",
+  "version": "1.1.3",
+  "description": "KLABYTV — IPTV player for Xtream Codes subscriptions, with data usage tracking",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac --universal",
+    "dist:linux": "electron-builder --linux",
+    "fetch-ffmpeg": "node scripts/fetch-ffmpeg.js",
+    "predist:mac": "node scripts/fetch-ffmpeg.js mac",
+    "predist:win": "node scripts/fetch-ffmpeg.js win",
+    "dist:mac-universal-on-linux": "node scripts/fetch-ffmpeg.js mac && electron-builder --mac dir --arm64 --x64 && node scripts/make-universal.js dist/mac/KLABYTV.app dist/mac-arm64/KLABYTV.app dist/mac-universal/KLABYTV.app && cd dist/mac-universal && zip -qry ../KLABYTV-mac-universal.zip KLABYTV.app"
+  },
+  "dependencies": {
+    "hls.js": "1.5.17",
+    "mpegts.js": "1.7.3"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8",
+    "resedit": "^2.0.3"
+  },
+  "build": {
+    "appId": "tv.klabytv.app",
+    "productName": "KLABYTV",
+    "files": [
+      "src/**/*",
+      "node_modules/hls.js/dist/hls.min.js",
+      "node_modules/mpegts.js/dist/mpegts.js",
+      "package.json",
+      "build/icon.png"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "signAndEditExecutable": false,
+      "icon": "build/icon.ico",
+      "extraResources": [
+        {
+          "from": "vendor/ffmpeg/win-${arch}",
+          "to": "ffmpeg",
+          "filter": [
+            "ffmpeg.exe",
+            "ffmpeg.LICENSE"
+          ]
+        }
+      ]
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "category": "public.app-category.video",
+      "identity": "-",
+      "extraResources": [
+        {
+          "from": "vendor/ffmpeg/mac-${arch}",
+          "to": "ffmpeg",
+          "filter": [
+            "ffmpeg",
+            "ffmpeg.LICENSE"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "afterPack": "scripts/after-pack.js"
+  },
+  "author": "KLABYTV"
+}

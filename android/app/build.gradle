@@ -1,0 +1,88 @@
+plugins {
+    id 'com.android.application'
+}
+
+// The web UI (same as the desktop app) is copied into the APK's assets, keeping the relative
+// paths index.html uses: www/src/renderer/... and www/node_modules/{hls.js,mpegts.js}/dist/...
+def webOut = layout.buildDirectory.dir('generated/www')
+tasks.register('copyWeb', Sync) {
+    into webOut.map { it.dir('www') }
+    from('../../src/renderer') { into 'src/renderer' }
+    from('../../node_modules/hls.js/dist/hls.min.js') { into 'node_modules/hls.js/dist' }
+    from('../../node_modules/mpegts.js/dist/mpegts.js') { into 'node_modules/mpegts.js/dist' }
+}
+
+android {
+    namespace 'tv.klabytv'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'tv.klabytv.app'
+        minSdk 24
+        targetSdk 35
+        versionCode 5
+        versionName '1.1.3'
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    // Two apps that install side by side: phones (mobile layout) and TV / tablets (TV layout;
+    // remote on TVs, touch on tablets). Only the TV one shows up on the Android TV home screen.
+    flavorDimensions = ['device']
+    productFlavors {
+        phone {
+            dimension 'device'
+            applicationId 'tv.klabytv.app'
+            resValue 'string', 'app_name', 'KLABYTV'
+        }
+        tv {
+            dimension 'device'
+            applicationId 'tv.klabytv.tv'
+            resValue 'string', 'app_name', 'KLABYTV TV'
+        }
+    }
+
+    // Release signing: android/keystore/klabytv.jks + android/keystore.properties (both kept out of
+    // git). Keep them: Android only installs updates signed with the same key. Without them the
+    // release build is signed with the debug key.
+    def ks = new Properties()
+    def ksProps = rootProject.file('keystore.properties')
+    if (ksProps.exists()) ksProps.withInputStream { ks.load(it) }
+    def ksFile = rootProject.file(ks.getProperty('storeFile', 'keystore/klabytv.jks'))
+    signingConfigs {
+        release {
+            storeFile ksFile
+            storePassword ks.getProperty('storePassword') ?: project.findProperty('KLABYTV_STORE_PASSWORD')
+            keyAlias ks.getProperty('keyAlias', 'klabytv')
+            keyPassword ks.getProperty('keyPassword') ?: project.findProperty('KLABYTV_KEY_PASSWORD')
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig ksFile.exists() ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    sourceSets {
+        main.assets.srcDirs += webOut
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+tasks.named('preBuild') { dependsOn 'copyWeb' }
+
+dependencies {
+    implementation 'androidx.webkit:webkit:1.12.1'
+    implementation 'androidx.media3:media3-exoplayer:1.4.1'
+    implementation 'androidx.media3:media3-exoplayer-hls:1.4.1'
+    implementation 'androidx.media3:media3-ui:1.4.1'
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
+}
