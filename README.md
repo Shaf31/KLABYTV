@@ -18,7 +18,6 @@ An IPTV player for Windows, Mac, Android and Android TV, in the spirit of IPTV S
   - A home screen with a large billboard and horizontal rows: continue watching, recently watched channels, My List, newest movies and series, top rated, and one row per category.
   - Detail pages for movies and series, with episodes by season and similar titles.
   - A "Who's watching?" screen for accounts, a global search, and a Netflix-style player.
-  - Font: Shoor.
 - **Arabic and English**: the app follows the device language, and you can change it in Settings → Language (Automatic / العربية / English). The layout flips right-to-left or left-to-right with the language. Both languages use the Shoor font.
 - **M3U playlists**: on the sign-in screen, choose "M3U playlist" and paste the playlist link, or pick an `.m3u` file from the device.
   - The playlist is split into channels, movies and series automatically. Episodes are grouped by season from names like `S01E02`.
