@@ -4,6 +4,7 @@
 //   - send the configured User-Agent (many Xtream servers require one),
 //   - follow the server's redirects and avoid CORS problems in the player.
 const http = require('http');
+const { fetchHttpFallback } = require('./net');
 const { Readable, Transform } = require('stream');
 
 const PREFERRED_PORT = 17845;
@@ -112,7 +113,7 @@ function createProxy({ usage, getUserAgent, transcoder, getPlayback, isVod }) {
 
     let up;
     try {
-      up = await fetch(target, { headers, redirect: 'follow', signal: ac.signal });
+      up = await fetchHttpFallback(target, { headers, redirect: 'follow', signal: ac.signal });
     } catch (e) {
       if (!res.headersSent && !res.destroyed) {
         res.writeHead(502, { 'Content-Type': 'text/plain; charset=utf-8' });

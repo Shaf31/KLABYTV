@@ -3,6 +3,7 @@
 // the playlist, from an hour ago to a day and a half ahead, are kept.
 const zlib = require('zlib');
 const { Readable } = require('stream');
+const { fetchHttpFallback } = require('./net');
 
 const ENTITIES = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" };
 const unescape = (s) =>
@@ -35,7 +36,7 @@ class XmltvGuide {
     for (const c of channels) {
       if (c.epg_channel_id) wanted.add(c.epg_channel_id);
     }
-    const res = await fetch(this.url, { headers: { 'User-Agent': this.getUserAgent() }, redirect: 'follow', signal: AbortSignal.timeout(180_000) });
+    const res = await fetchHttpFallback(this.url, { headers: { 'User-Agent': this.getUserAgent() }, redirect: 'follow', signal: AbortSignal.timeout(180_000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     let body = Readable.fromWeb(res.body);
     body.on('data', (b) => this.usage.add('', b.length));

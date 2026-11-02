@@ -8,6 +8,7 @@ const { UsageTracker } = require('./main/usage');
 const { createProxy } = require('./main/proxy');
 const { XtreamClient } = require('./main/xtream');
 const { M3UClient } = require('./main/m3u');
+const { fetchHttpFallback } = require('./main/net');
 const { Transcoder } = require('./main/transcode');
 
 const DEFAULT_SETTINGS = {
@@ -63,7 +64,7 @@ async function downloadPlaylist(url) {
   if (!/^https?:\/\//i.test(url)) url = 'http://' + url;
   let res;
   try {
-    res = await fetch(url, { headers: { 'User-Agent': getUserAgent() }, redirect: 'follow', signal: AbortSignal.timeout(90_000) });
+    res = await fetchHttpFallback(url, { headers: { 'User-Agent': getUserAgent() }, redirect: 'follow', signal: AbortSignal.timeout(90_000) });
   } catch (e) {
     throw new Error(`تعذر تحميل القائمة: ${e.name === 'TimeoutError' ? 'انتهت مهلة الاتصال' : e.cause?.message || e.message}`);
   }

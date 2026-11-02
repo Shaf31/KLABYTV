@@ -1,4 +1,5 @@
 // Xtream Codes API client (player_api.php).
+const { fetchHttpFallback, toHttp } = require('./net');
 const LIVE_FORMATS = ['ts', 'm3u8'];
 
 function normalizeServer(input) {
@@ -28,11 +29,12 @@ class XtreamClient {
 
     let res;
     try {
-      res = await fetch(url, {
+      res = await fetchHttpFallback(url, {
         headers: { 'User-Agent': this.getUserAgent(), Accept: 'application/json' },
         redirect: 'follow',
         signal: AbortSignal.timeout(45_000),
       });
+      if (res.downgraded) this.server = toHttp(this.server); // saved like that, streams use it too
     } catch (e) {
       const why = e.name === 'TimeoutError' ? 'انتهت مهلة الاتصال' : e.cause?.message || e.message;
       throw new Error(`تعذر الاتصال بالسيرفر: ${why}`);

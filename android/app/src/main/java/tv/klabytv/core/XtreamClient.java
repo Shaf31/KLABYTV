@@ -18,7 +18,7 @@ public class XtreamClient implements Provider {
         String get();
     }
 
-    public final String server;
+    public volatile String server; // may switch from https:// to http:// (see Http.open)
     public final String username;
     final String password;
     private final UsageTracker usage;
@@ -66,6 +66,10 @@ public class XtreamClient implements Provider {
         HttpURLConnection c;
         try {
             c = Http.open(url.toString(), userAgent.get(), null, 45_000);
+            if (server.startsWith("https://") && "http".equals(c.getURL().getProtocol()) && !url.toString().startsWith("http://")) {
+                // https:// on a port that only speaks http: keep using http (saved like that, streams too)
+                if (c.getURL().getHost().equalsIgnoreCase(new URL(server).getHost())) server = "http://" + server.substring(8);
+            }
         } catch (IOException e) {
             String why = e instanceof java.net.SocketTimeoutException ? "انتهت مهلة الاتصال" : e.getMessage();
             throw new Exception("تعذر الاتصال بالسيرفر: " + why);
@@ -125,8 +129,30 @@ public class XtreamClient implements Provider {
             return open(url, userAgent, range, timeoutMs, null);
         }
 
+        /**
+         * People often write https:// for a server whose port only speaks plain http (very common
+         * with IPTV panels, e.g. :8080 or :2095): the TLS handshake then fails with a protocol
+         * error ("Unable to parse TLS packet header"). The same address is tried again over http.
+         * Certificate problems are never retried.
+         */
+        static boolean plainHttpOnTls(IOException e) {
+            if (!(e instanceof javax.net.ssl.SSLException)) return false;
+            String m = String.valueOf(e.getMessage()).toLowerCase();
+            for (Throwable c = e.getCause(); c != null; c = c.getCause()) m += " " + String.valueOf(c.getMessage()).toLowerCase();
+            return !(m.contains("cert") || m.contains("trust") || m.contains("hostname") || m.contains("expired") || m.contains("chain"));
+        }
+
         /** extra: more request headers (they win over the default User-Agent) */
         public static HttpURLConnection open(String url, String userAgent, String range, int timeoutMs, java.util.Map<String, String> extra) throws IOException {
+            try {
+                return openOnce(url, userAgent, range, timeoutMs, extra);
+            } catch (IOException e) {
+                if (!url.regionMatches(true, 0, "https://", 0, 8) || !plainHttpOnTls(e)) throw e;
+                return openOnce("http://" + url.substring(8), userAgent, range, timeoutMs, extra);
+            }
+        }
+
+        private static HttpURLConnection openOnce(String url, String userAgent, String range, int timeoutMs, java.util.Map<String, String> extra) throws IOException {
             String current = url;
             for (int i = 0; i < 6; i++) {
                 HttpURLConnection c = (HttpURLConnection) new URL(current).openConnection();
