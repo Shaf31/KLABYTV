@@ -245,7 +245,11 @@ async function playerView(root, p) {
   function toCompat() {
     if (android) return goNative();
     if (web) {
+      // Samsung TV: its own player already plays every format, so there's nothing to convert;
+      // show what it reported instead
+      const why = web.nativeOnly && video.error ? video.error.message : '';
       destroyEngine();
+      if (web.nativeOnly) return showError(t('تعذر تشغيل البث.'), why);
       return showError(t('الصيغة دي مش بتشتغل في المتصفح (زي MKV أو صوت AC3). شغّلها من برنامج الكمبيوتر أو الموبايل.'));
     }
     if (compat || closed) return;
@@ -303,6 +307,8 @@ async function playerView(root, p) {
   }
 
   video.addEventListener('error', () => {
+    // TV: Samsung's player plays TS and HLS too, and its errors come here
+    if (web && web.nativeOnly) return engine && fail((video.error && video.error.message) || 'AVPlay error');
     if (!engine || compat || format === 'ts' || format === 'm3u8') return; // engines report their own errors
     const code = video.error && video.error.code;
     fail(code === 4 ? 'MEDIA_ERR_SRC_NOT_SUPPORTED' : `media error ${code}`);
@@ -476,7 +482,7 @@ async function playerView(root, p) {
       h('div.row',
         h('button.btn.focusable', { onclick: () => { retries = 0; open().catch((e) => showError(e.message)); }, 'data-autofocus': true }, t('إعادة المحاولة')),
         isLive ? h('button.btn.focusable', { onclick: switchFormat }, t('جرّب {0}', [format === 'ts' ? 'HLS' : 'TS'])) : null,
-        !compat ? h('button.btn.focusable', { onclick: toCompat }, t('وضع التوافق')) : null,
+        !compat && !web ? h('button.btn.focusable', { onclick: toCompat }, t('وضع التوافق')) : null,
         h('button.btn.focusable', { onclick: () => Router.back() }, t('رجوع')),
       ),
     );

@@ -94,6 +94,9 @@ function configXml() {
     <feature name="http://tizen.org/feature/screen.size.normal.1080.1920"/>
     <!-- IPTV servers can be anywhere, on any port, over http or https -->
     <access origin="*" subdomains="true"/>
+    <!-- without a policy the TV applies a strict default; streams, images and Samsung's player
+         (an <object>) come from anywhere -->
+    <tizen:content-security-policy>default-src * data: blob: 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; object-src *; media-src * data: blob:; img-src * data: blob:; connect-src *; style-src * 'unsafe-inline'; font-src * data:</tizen:content-security-policy>
     <tizen:allow-navigation>*</tizen:allow-navigation>
     <tizen:privilege name="http://tizen.org/privilege/internet"/>
     <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>

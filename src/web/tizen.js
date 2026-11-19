@@ -132,6 +132,7 @@
     let muted = false;
     let ticker = null;
     let lastTick = 0;
+    let triedHttp = false;
     const fire = (type) => el.dispatchEvent(new Event(type));
     const state = () => {
       try {
@@ -180,6 +181,23 @@
       document.documentElement.classList.remove('avplay-on');
     }
 
+    // What went wrong, with where it was playing from (shown under the error in the player).
+    function failed(what) {
+      // https:// on a port that only speaks http: once, the same address over http
+      if (!triedHttp && /^https:/i.test(src)) {
+        triedHttp = true;
+        open(src.replace(/^https:/i, 'http:'));
+        return;
+      }
+      let where = '';
+      try {
+        const u = new URL(src);
+        where = ` · ${u.protocol.replace(':', '')}://${u.host}`;
+      } catch { /* no address */ }
+      error = { code: 4, message: `${what}${where}` };
+      fire('error');
+    }
+
     function open(url) {
       close();
       error = null;
@@ -209,10 +227,7 @@
             paused = true;
             fire('ended');
           },
-          onerror: (type) => {
-            error = { code: 4, message: String(type) };
-            fire('error');
-          },
+          onerror: (type) => failed(String(type)),
           onevent: () => {},
         });
         document.documentElement.classList.add('avplay-on');
@@ -227,18 +242,14 @@
             fire('playing');
           }
           startTicker();
-        }, (e) => {
-          error = { code: 4, message: String(e && (e.name || e)) };
-          fire('error');
-        });
+        }, (e) => failed(String((e && (e.name || e.message)) || e)));
       } catch (e) {
-        error = { code: 4, message: e.message };
-        setTimeout(() => fire('error'));
+        setTimeout(() => failed(`${e.name || 'Error'}: ${e.message}`));
       }
     }
 
     Object.defineProperties(el, {
-      src: { get: () => src, set: (v) => ((src = String(v || '')), src ? open(src) : close()) },
+      src: { get: () => src, set: (v) => ((src = String(v || '')), (triedHttp = false), src ? open(src) : close()) },
       currentTime: {
         get: () => time,
         set: (v) => {
