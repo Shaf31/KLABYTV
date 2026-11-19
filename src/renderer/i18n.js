@@ -17,6 +17,10 @@ document.documentElement.classList.add(RTL ? 'rtl' : 'ltr');
 const LOCALE = RTL ? 'ar-EG-u-nu-latn' : 'en-GB';
 
 const EN = {
+  "في المتصفح مفيش وضع توافق: الصيغ اللي المتصفح مش بيشغلها (MKV، صوت AC3/DTS…) محتاجة برنامج الكمبيوتر أو الموبايل.": "There's no compatibility mode in a browser: formats the browser can't play (MKV, AC3/DTS audio…) need the desktop or mobile app.",
+  "في المتصفح البافر ده بيمشي على قنوات وأفلام HLS و TS بس؛ أفلام MP4 المتصفح بيحمّلها بطريقته، واستهلاكها بيتحسب بالتقريب.": "In a browser this buffer applies to HLS and TS only; the browser loads MP4 movies its own way, and their data usage is estimated.",
+  "البث بيقف لما تروح لتاب تانية أو تصغّر المتصفح، وبيكمّل لوحده لما ترجعله.": "Playback stops when you switch to another tab or minimize the browser, and resumes by itself when you come back.",
+  "الصيغة دي مش بتشتغل في المتصفح (زي MKV أو صوت AC3). شغّلها من برنامج الكمبيوتر أو الموبايل.": "This format doesn't play in a browser (e.g. MKV or AC3 audio). Play it in the desktop or mobile app.",
   "رابط القائمة (M3U / M3U8)": "Playlist link (M3U / M3U8)",
   "مفيش ملف متختار": "No file chosen",
   "اختار ملف من الجهاز": "Choose a file from this device",

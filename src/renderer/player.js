@@ -21,7 +21,9 @@ async function playerView(root, p) {
   // In that mode VOD seeking restarts the conversion at `offset` seconds.
   // Containers Chromium can't play are converted from the start; streams that needed it once are remembered.
   const compatKey = `compat:${S.account.id}:${p.kind}:${p.id}`;
-  let compat = store.get(compatKey, false) || (!isLive && /^(mkv|avi|wmv|flv|mpg|mpeg|vob|divx|xvid|3gp|m2ts|mts|rmvb)$/i.test(format || ''));
+  // Web version: no ffmpeg; the browser itself plays what it can (window.api.web, src/web/core.js).
+  const web = window.api.web || null;
+  let compat = !web && (store.get(compatKey, false) || (!isLive && /^(mkv|avi|wmv|flv|mpg|mpeg|vob|divx|xvid|3gp|m2ts|mts|rmvb)$/i.test(format || '')));
   let compatInfo = null;
   let offset = 0;
   let seekTarget = null;
@@ -98,7 +100,7 @@ async function playerView(root, p) {
         !isLive && hasNext ? h('button.osd-btn.next-ep.focusable', { title: t('الحلقة التالية'), onclick: (e) => { e.stopPropagation(); step(1); } }, icon('next'), h('span', t('الحلقة التالية'))) : null,
         isLive && !(S.account && S.account.type === 'm3u') ? h('button.osd-btn.text.focusable', { title: t('تبديل صيغة البث'), onclick: (e) => { e.stopPropagation(); switchFormat(); } }, 'TS/HLS') : null,
         el.quality,
-        btn('tune', t('وضع التوافق: تشغيل أي صيغة (C)'), () => toggleCompat()),
+        web ? null : btn('tune', t('وضع التوافق: تشغيل أي صيغة (C)'), () => toggleCompat()),
         el.stats,
         el.full,
       ),
@@ -135,7 +137,7 @@ async function playerView(root, p) {
     } else if (format === 'm3u8' && window.Hls && Hls.isSupported()) {
       // Movies/episodes keep exactly bufferSec ahead (settings); live keeps hls.js' default 30s.
       const bufferCfg = isLive ? { maxBufferLength: 30 } : { maxBufferLength: bufferSec, maxMaxBufferLength: bufferSec, backBufferLength: 30 };
-      const hls = new Hls({ enableWorker: true, ...bufferCfg, fragLoadingMaxRetry: 6, manifestLoadingMaxRetry: 3 });
+      const hls = new Hls({ enableWorker: true, ...bufferCfg, fragLoadingMaxRetry: 6, manifestLoadingMaxRetry: 3, ...(web ? web.hlsConfig(sid) : {}) });
       let mediaRecoveries = 0;
       hls.on(Hls.Events.ERROR, (_e, d) => {
         if (!d.fatal) return;
@@ -156,7 +158,7 @@ async function playerView(root, p) {
       const pl = mpegts.createPlayer(
         { type: 'mpegts', isLive, url },
         {
-          enableWorker: true,
+          enableWorker: !web, // web: loading stays in the page, where its bytes are counted
           autoCleanupSourceBuffer: true,
           enableStashBuffer: true,
           stashInitialSize: 384 * 1024,
@@ -241,6 +243,10 @@ async function playerView(root, p) {
   // Switch to compatibility mode, keeping the current position for movies/episodes.
   function toCompat() {
     if (android) return goNative();
+    if (web) {
+      destroyEngine();
+      return showError(t('الصيغة دي مش بتشتغل في المتصفح (زي MKV أو صوت AC3). شغّلها من برنامج الكمبيوتر أو الموبايل.'));
+    }
     if (compat || closed) return;
     compat = true;
     store.set(compatKey, true);
@@ -395,7 +401,9 @@ async function playerView(root, p) {
   function reportPosition() {
     const d = dur();
     if (isLive || !sid || !isFinite(d) || d <= 0) return;
-    window.api.streamPosition(sid, { pos: pos(), dur: d }).catch(() => {});
+    let buffered = 0; // web version: how much the browser downloaded, for the usage estimate
+    for (let i = 0; i < video.buffered.length; i++) buffered += video.buffered.end(i) - video.buffered.start(i);
+    window.api.streamPosition(sid, { pos: pos(), dur: d, buffered }).catch(() => {});
   }
   function seekBy(sec) {
     seekTo(pos() + sec);
@@ -817,7 +825,7 @@ async function playerView(root, p) {
     if (k === 'm' || k === 'M' || k === 'AudioVolumeMute') return toggleMute(), true;
     if (k === 'f' || k === 'F' || k === 'F11') return toggleFullscreen(), true;
     if (k === 'i' || k === 'I') return toggleStats(), true;
-    if (k === 'c' || k === 'C') return toggleCompat(), true;
+    if (!web && (k === 'c' || k === 'C')) return toggleCompat(), true;
     if (k === 'q' || k === 'Q') return toggleQualityMenu(true), true;
     return false;
   };

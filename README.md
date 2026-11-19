@@ -63,6 +63,8 @@ npm start
   - The layout can be changed in Settings → Display (Automatic / Mobile / TV).
   - To install: copy the file to the device, open it, and allow "Install from unknown sources". On a TV box you can use the Downloader app or a USB stick.
 
+- **Web version**: `KLABYTV-1.0.0-alpha-web.zip`. It runs in any browser through a small local server that relays requests to IPTV servers (browsers can't call them directly). Needs [Node.js](https://nodejs.org) 18+: unzip, double-click `Start KLABYTV Web.command` (Mac) or `Start KLABYTV Web.bat` (Windows), and it opens `http://localhost:8080`. From source: `npm run web`. Add `--lan` to use it from other devices on your network. In a browser, formats like MKV or AC3 audio may not play, and data usage for MP4 movies is estimated.
+
 ## Building from source
 - Mac, on a Mac: `npm install && npm run dist:mac` (Universal + DMG).
 - Mac, on Linux: `npm run dist:mac-universal-on-linux` (needs `llvm-lipo`: `apt install llvm`).
@@ -123,5 +125,6 @@ src/main/proxy.js      Local proxy that passes streams through and counts data u
 src/main/usage.js      Usage history (daily + per session)
 src/main/transcode.js  Compatibility mode (format conversion with ffmpeg)
 vendor/ffmpeg/         ffmpeg for Mac (arm64 and Intel) and Windows
+src/web/               Web version: core.js (the app's core in plain JavaScript, also for Samsung TVs) and server.js (local relay)
 src/renderer/          The interface: nav.js (navigation and keyboard), player.js, views.js, i18n.js (English)
 ```

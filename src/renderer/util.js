@@ -115,6 +115,7 @@ function b64(s) {
 // Posters and logos also go through the local proxy so their bytes are counted.
 function img(url) {
   if (!url || !/^https?:\/\//i.test(url)) return '';
+  if (!S.proxyOrigin) return url; // Samsung TV: images load directly
   return `${S.proxyOrigin}/p?s=&u=${encodeURIComponent(url)}${S.proxyToken ? `&t=${S.proxyToken}` : ''}`;
 }
 

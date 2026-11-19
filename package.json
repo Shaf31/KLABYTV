@@ -6,6 +6,7 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
+    "web": "node src/web/server.js",
     "dist": "electron-builder",
     "dist:win": "electron-builder --win",
     "dist:mac": "electron-builder --mac --universal",
