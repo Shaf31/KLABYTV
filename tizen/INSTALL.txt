@@ -5,7 +5,25 @@ KLABYTV is a player only: you need your own M3U / M3U8 link or Xtream Codes deta
 The app runs on the TV by itself: no computer, phone or server is needed once it's installed.
 Made for Samsung TVs from 2020 (Tizen 5.5) onwards; best on 2022 and newer.
 
-One-time setup (on your Mac, with the TV on the same network)
+Install from an Android phone (no computer needed)
+--------------------------------------------------
+Uses Apps2Samsung, a free community app (https://github.com/Apps2Samsung/Apps2Samsung, Android 5.0+).
+It finds the TV, makes the Samsung signing certificate and installs, all on the phone.
+1. TV and phone on the same Wi-Fi. Note the phone's IP: Settings → Wi-Fi → ⚙ next to your network.
+2. On the TV: open Apps, type 1 2 3 4 5 on the remote (slim remote: the 123 button shows a number
+   pad), switch Developer Mode ON, enter the PHONE's IP as Host PC IP, then restart the TV fully
+   (hold Power ~5 s or unplug for 30 s). Apps now shows a "Developer Mode" label.
+3. On the phone: install Apps2Samsung (the -android.apk from its GitHub releases, or the F-Droid
+   repository https://apps2samsung.com/fdroid/repo).
+4. Save KLABYTV-<version>.wgt on the phone (Downloads).
+5. Apps2Samsung → Install tab → tap your TV under "Select TV" (or "Add TV by IP…").
+6. Scroll to "Your own package" → "WGT / TPK" → choose the KLABYTV .wgt.
+7. The first time: "Sign in with Samsung" with your Samsung account (the certificate is kept for
+   later installs). Wait for "KLABYTV has been successfully installed!", then open it from Apps.
+
+Install from a computer (Mac, Windows or Linux) with Tizen Studio
+------------------------------------------------------------------
+One-time setup (on the computer, with the TV on the same network)
 -------------------------------------------------------------
 1. Install Tizen Studio from https://developer.samsung.com/smarttv/develop/getting-started/setting-up-sdk/installing-tv-sdk.html
    In its Package Manager, install "Samsung Certificate Extension" and the "TV Extensions"
