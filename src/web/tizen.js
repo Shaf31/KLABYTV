@@ -113,6 +113,42 @@
     });
 
   // ---------------------------------------------------------------- AVPlay as the video element
+  // "InvalidAccessError: PLAYER_ERROR_INVALID_OPERATION · ..." -> readable text
+  const errText = (e) => {
+    if (!e || typeof e !== 'object') return String(e || 'Error');
+    const name = String(e.name || '');
+    const msg = String(e.message || '');
+    if (name && msg && !msg.includes(name)) return `${name}: ${msg}`;
+    return name || msg || 'Error';
+  };
+  const hostOf = (url) => {
+    try {
+      const u = new URL(url);
+      return `${u.protocol.replace(':', '')}://${u.host}`;
+    } catch {
+      return '';
+    }
+  };
+
+  // Where a stream address really leads. IPTV servers often send the player on to another server
+  // (a redirect, usually with a token), and on some TV models AVPlay refuses to follow it
+  // (InvalidAccessError / PLAYER_ERROR_INVALID_OPERATION). The page's own network stack follows
+  // it, as long as the server allows web pages (CORS); the stream itself is dropped as soon as the
+  // answer starts. Resolves to the final address, or null when the server doesn't allow it.
+  function finalUrl(url) {
+    const ctl = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = setTimeout(() => ctl && ctl.abort(), 8000);
+    return fetch(url, { cache: 'no-store', credentials: 'omit', signal: ctl ? ctl.signal : undefined })
+      .then((res) => res.url || url, () => null)
+      .then((to) => {
+        clearTimeout(timer);
+        if (ctl) ctl.abort();
+        return to;
+      });
+  }
+  // once following a redirect made a stream play, every stream is resolved first (saves a failed try)
+  let resolveFirst = false;
+
   // The player (player.js) drives a <video>; on the TV it gets an <object> backed by AVPlay that
   // answers the same calls and events. The picture is drawn under the page, so the page is made
   // see-through while a video is open (html.avplay-on).
@@ -122,7 +158,9 @@
     const el = document.createElement('object');
     el.setAttribute('type', 'application/avplayer');
     el.className = 'avplay';
-    let src = '';
+    let src = ''; // the address the player gave (data usage and User-Agent go by it)
+    let playing = ''; // the address AVPlay was given: src, or where src redirects to
+    let gen = 0; // one per AVPlay session: callbacks of an older session are ignored
     let paused = true;
     let time = 0;
     let duration = NaN;
@@ -132,7 +170,8 @@
     let muted = false;
     let ticker = null;
     let lastTick = 0;
-    let triedHttp = false;
+    let tried = {}; // per src: the fallbacks already tried
+    let trail = ''; // what happened on the way, shown with the error
     const fire = (type) => el.dispatchEvent(new Event(type));
     const state = () => {
       try {
@@ -170,6 +209,7 @@
     }
 
     function close() {
+      gen++;
       clearInterval(ticker);
       ready = false;
       try {
@@ -181,58 +221,85 @@
       document.documentElement.classList.remove('avplay-on');
     }
 
-    // What went wrong, with where it was playing from (shown under the error in the player).
-    function failed(what) {
-      // https:// on a port that only speaks http: once, the same address over http
-      if (!triedHttp && /^https:/i.test(src)) {
-        triedHttp = true;
-        open(src.replace(/^https:/i, 'http:'));
+    // AVPlay couldn't open `playing` (session `my`): try what may help, then report what went wrong,
+    // with where it was playing from (shown under the error in the player).
+    function failed(what, my, started) {
+      if (my !== gen) return;
+      // problems reaching the stream; once it played, a new attempt is the player's call
+      if (!started && !tried.redirect) {
+        tried.redirect = true;
+        const from = playing;
+        finalUrl(from).then((to) => {
+          if (my !== gen) return; // closed or another stream meanwhile
+          if (to && to !== from) {
+            trail += ` → ${hostOf(to) === hostOf(from) ? 'redirect' : hostOf(to)}`;
+            tried.redirected = true;
+            return open(to);
+          }
+          trail += to ? '' : ' (?)'; // the server didn't let the app look (CORS)
+          failed(what, my, started);
+        });
         return;
       }
-      let where = '';
-      try {
-        const u = new URL(src);
-        where = ` · ${u.protocol.replace(':', '')}://${u.host}`;
-      } catch { /* no address */ }
-      error = { code: 4, message: `${what}${where}` };
+      // https:// on a port that only speaks http: once, the same address over http
+      if (!started && !tried.http && /^https:/i.test(playing)) {
+        tried.http = true;
+        trail += ' → http';
+        open(playing.replace(/^https:/i, 'http:'));
+        return;
+      }
+      error = { code: 4, message: `${what} · ${hostOf(src)}${trail}` };
       fire('error');
     }
 
     function open(url) {
       close();
+      const my = gen;
+      playing = url;
       error = null;
       ready = false;
       time = 0;
       duration = NaN;
+      let settled = false;
+      // AVPlay may report one failure twice (listener + prepare's error callback): only the first counts
+      const bad = (what) => {
+        if (my !== gen || settled) return;
+        settled = true;
+        failed(what, my, ready);
+      };
       try {
         av.open(url);
         av.setDisplayRect(0, 0, 1920, 1080);
         try {
           av.setDisplayMethod('PLAYER_DISPLAY_MODE_LETTER_BOX');
         } catch { /* older firmware */ }
-        const ua = web.userAgentFor(url);
+        const ua = web.userAgentFor(src);
         if (ua) {
           try {
             av.setStreamingProperty('USER_AGENT', ua);
           } catch { /* not supported */ }
         }
         av.setListener({
-          onbufferingstart: () => fire('waiting'),
-          onbufferingcomplete: () => fire('playing'),
+          onbufferingstart: () => my === gen && fire('waiting'),
+          onbufferingcomplete: () => my === gen && fire('playing'),
           oncurrentplaytime: (ms) => {
+            if (my !== gen) return;
             time = ms / 1000;
             fire('timeupdate');
           },
           onstreamcompleted: () => {
+            if (my !== gen) return;
             paused = true;
             fire('ended');
           },
-          onerror: (type) => failed(String(type)),
+          onerror: (type) => bad(errText(type)),
           onevent: () => {},
         });
         document.documentElement.classList.add('avplay-on');
         av.prepareAsync(() => {
+          if (my !== gen) return;
           ready = true;
+          if (tried.redirected) resolveFirst = true;
           const d = av.getDuration();
           duration = d > 0 ? d / 1000 : Infinity; // live: no duration
           fire('loadedmetadata');
@@ -242,14 +309,33 @@
             fire('playing');
           }
           startTicker();
-        }, (e) => failed(String((e && (e.name || e.message)) || e)));
+        }, (e) => bad(errText(e)));
       } catch (e) {
-        setTimeout(() => failed(`${e.name || 'Error'}: ${e.message}`));
+        setTimeout(() => bad(errText(e)));
       }
     }
 
+    function load(url) {
+      tried = {};
+      trail = '';
+      if (!resolveFirst) return open(url);
+      // this TV needed redirects followed before: do it first
+      close();
+      const my = gen;
+      tried.redirect = true;
+      finalUrl(url).then((to) => {
+        if (my !== gen) return;
+        if (to && to !== url) {
+          trail = ` → ${hostOf(to) === hostOf(url) ? 'redirect' : hostOf(to)}`;
+          tried.redirected = true;
+        }
+        if (!to) trail = ' (?)';
+        open(to || url);
+      });
+    }
+
     Object.defineProperties(el, {
-      src: { get: () => src, set: (v) => ((src = String(v || '')), (triedHttp = false), src ? open(src) : close()) },
+      src: { get: () => src, set: (v) => ((src = String(v || '')), src ? load(src) : close()) },
       currentTime: {
         get: () => time,
         set: (v) => {
