@@ -787,10 +787,10 @@ async function settingsView(root) {
         settingRow(t('لغة البرنامج'), t('تلقائي = نفس لغة الجهاز.'),
           selectBox([['', t('تلقائي (لغة الجهاز)')], ['ar', 'العربية'], ['en', 'English']], languageSetting(), (v) => setLanguage(v), { 'data-key': 'language' })),
       ),
-      S.platform === 'android' ? h('section.settings-card',
+      S.platform === 'android' || S.platform === 'web' ? h('section.settings-card',
         h('h2', t('الشاشة')),
-        settingRow(t('شكل الواجهة'), S.formFactor === 'phone' ? t('تلقائي: شكل الموبايل.') : t('تلقائي: شكل التلفزيون — بالريموت على التي في وباللمس على التابلت.'),
-          selectBox([['auto', t('تلقائي')], ['mobile', t('موبايل (لمس)')], ['tv', t('تلفزيون (ريموت)')]], S.settings.uiMode || 'auto', async (v) => {
+        settingRow(t('شكل الواجهة'), S.platform === 'web' ? t('تلقائي: حسب الجهاز — كمبيوتر أو موبايل أو تلفزيون.') : S.formFactor === 'phone' ? t('تلقائي: شكل الموبايل.') : t('تلقائي: شكل التلفزيون — بالريموت على التي في وباللمس على التابلت.'),
+          selectBox([['auto', t('تلقائي')], ...(S.platform === 'web' ? [['desktop', t('كمبيوتر (كيبورد وماوس)')]] : []), ['mobile', t('موبايل (لمس)')], ['tv', t('تلفزيون (ريموت)')]], S.settings.uiMode || 'auto', async (v) => {
             await save({ uiMode: v }, t('تم تغيير شكل الواجهة'));
             applyUiMode();
             renderTopbar();

@@ -9,6 +9,11 @@
   if (window.api) return; // desktop (preload) or Android (android-bridge.js)
 
   const PLATFORM = typeof window.tizen !== 'undefined' ? 'tizen' : 'web';
+  // The web version opened in a TV's or a phone's browser gets the TV / mobile layout.
+  const UA = navigator.userAgent;
+  const TV_BROWSER = /SMART-TV|SmartTV|Tizen|Web0S|webOS|NetCast|HbbTV|BRAVIA|Android TV|GoogleTV|AFT[A-Z]|CrKey|VIDAA/i.test(UA);
+  const PHONE_BROWSER = !TV_BROWSER && /Mobi|iPhone|Android.+Mobile/i.test(UA);
+  const FORM_FACTOR = PLATFORM === 'tizen' || TV_BROWSER ? 'tv' : PHONE_BROWSER ? 'phone' : 'desktop';
   const RELAY = PLATFORM === 'web' ? `${location.origin}/r` : '';
   const DEFAULT_UA = 'VLC/3.0.20 LibVLC/3.0.20';
   const LIVE_FORMATS = ['ts', 'm3u8'];
@@ -144,7 +149,8 @@
   // ---------------------------------------------------------------- settings
   function defaultDeviceName() {
     if (PLATFORM === 'tizen') return 'Samsung TV';
-    const ua = navigator.userAgent;
+    if (TV_BROWSER) return /Tizen|SMART-TV/i.test(UA) ? 'Samsung TV (browser)' : /Web0S|webOS|NetCast/i.test(UA) ? 'LG TV (browser)' : 'TV (browser)';
+    const ua = UA;
     const browser = /Edg\//.test(ua) ? 'Edge' : /OPR\//.test(ua) ? 'Opera' : /Firefox\//.test(ua) ? 'Firefox' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : 'Browser';
     const os = /Android/.test(ua) ? 'Android' : /iPhone|iPad/.test(ua) ? 'iOS' : /Mac OS X/.test(ua) ? 'Mac' : /Windows/.test(ua) ? 'Windows' : /Linux/.test(ua) ? 'Linux' : '';
     return os ? `${browser} · ${os}` : browser;
@@ -710,6 +716,18 @@
   const emit = (event, data) => (listeners[event] || []).forEach((fn) => fn(data));
   document.addEventListener('visibilitychange', () => emit('window-state', document.hidden ? 'hidden' : 'shown'));
 
+  // The browser's Back (the TV remote's Back, a phone's back gesture) goes back inside the app, like
+  // Esc; only at the first screen does it leave the page.
+  if (PLATFORM === 'web') {
+    history.pushState({ klabytv: true }, '');
+    addEventListener('popstate', () => {
+      window.__escapeConsumed = false;
+      (document.activeElement || document.body).dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+      if (window.__escapeConsumed) history.pushState({ klabytv: true }, '');
+      else history.back();
+    });
+  }
+
   // Played by the browser itself (MP4 ...): it downloads the file on its own, so usage is
   // estimated from how much of the video it has buffered.
   async function measureFile(sid, upstream, headers) {
@@ -730,7 +748,7 @@
       proxyOrigin: RELAY ? location.origin : '',
       proxyToken: '',
       platform: PLATFORM,
-      formFactor: PLATFORM === 'tizen' ? 'tv' : 'desktop',
+      formFactor: FORM_FACTOR,
     }),
 
     addAccount: async ({ type, name, server, username, password, url, text: body, fileName }) => {
@@ -850,7 +868,8 @@
     },
 
     saveSettings: async (patch) => {
-      for (const k of ['userAgent', 'liveFormat', 'deviceName']) if (k in patch) settings[k] = String(patch[k] ?? '').trim();
+      for (const k of ['userAgent', 'liveFormat', 'deviceName', 'uiMode']) if (k in patch) settings[k] = String(patch[k] ?? '').trim();
+      if (!['auto', 'desktop', 'mobile', 'tv'].includes(settings.uiMode)) settings.uiMode = 'auto';
       for (const k of ['showPlayerStats', 'stillWatching', 'pauseWhenMinimized']) if (k in patch) settings[k] = !!patch[k];
       if ('seekStep' in patch) settings.seekStep = Math.min(600, Math.max(3, Number(patch.seekStep) || 10));
       if ('bufferSeconds' in patch) settings.bufferSeconds = Math.min(1800, Math.max(15, Number(patch.bufferSeconds) || 60));

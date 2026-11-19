@@ -82,9 +82,12 @@ function renderTabbar(signedIn) {
 function applyUiMode() {
   const choice = S.settings.uiMode || 'auto';
   let mode = 'desktop';
-  if (choice === 'mobile' || choice === 'tv') mode = choice;
+  if (choice === 'mobile' || choice === 'tv' || choice === 'desktop') mode = choice;
   // phone APK: mobile layout; TV APK: TV layout, also on tablets (with touch)
   else if (S.platform === 'android') mode = S.formFactor === 'phone' ? 'mobile' : 'tv';
+  // web version / Samsung TV app: from the device it runs on
+  else if (S.formFactor === 'tv') mode = 'tv';
+  else if (S.formFactor === 'phone') mode = 'mobile';
   document.body.classList.remove('ui-desktop', 'ui-mobile', 'ui-tv', 'ui-touch');
   document.body.classList.add(`ui-${mode}`);
   if (mode === 'mobile' || (S.platform === 'android' && S.formFactor !== 'tv')) document.body.classList.add('ui-touch');
