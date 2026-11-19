@@ -1,0 +1,37 @@
+KLABYTV for Samsung TVs (Tizen) — v1.0.0-alpha
+==============================================
+
+KLABYTV is a player only: you need your own M3U / M3U8 link or Xtream Codes details.
+The app runs on the TV by itself: no computer, phone or server is needed once it's installed.
+Made for Samsung TVs from 2020 (Tizen 5.5) onwards; best on 2022 and newer.
+
+One-time setup (on your Mac, with the TV on the same network)
+-------------------------------------------------------------
+1. Install Tizen Studio from https://developer.samsung.com/smarttv/develop/getting-started/setting-up-sdk/installing-tv-sdk.html
+   In its Package Manager, install "Samsung Certificate Extension" and the "TV Extensions"
+   (Extension SDK tab).
+2. On the TV: open Apps, type 1 2 3 4 5 on the remote, switch Developer Mode ON, enter your
+   Mac's IP address, then restart the TV (hold the power button or unplug it for 30 seconds).
+3. Connect to the TV (Terminal):
+     ~/tizen-studio/tools/sdb connect <TV-IP>
+     ~/tizen-studio/tools/sdb devices          <- note the TV's name in the list
+4. In Tizen Studio: Tools → Certificate Manager → "+" → Samsung → TV → create an author
+   certificate (sign in with your Samsung account) and a distributor certificate; the TV's
+   DUID is filled in when the TV is connected. Keep a backup: updates need the same certificate.
+
+Install / update the app (Terminal, in the folder with this file)
+-----------------------------------------------------------------
+     ~/tizen-studio/tools/ide/bin/tizen package -t wgt -s <your certificate profile name> -- "$PWD/KLABYTV"
+     ~/tizen-studio/tools/ide/bin/tizen install -n KLABYTV.wgt -t <TV name from sdb devices> -- "$PWD/KLABYTV"
+
+The certificate profile name is the one you gave in the Certificate Manager. KLABYTV.wgt is
+created inside the KLABYTV folder. Then open KLABYTV from the TV's Apps.
+
+Notes
+-----
+- Developer Mode must stay ON on the TV, or sideloaded apps are removed.
+- Remote: arrows + OK to move, Back to go back (Back on the Home screen closes the app),
+  Play/Pause, Fast-forward/Rewind to skip, Channel +/- in the player, Red = My List,
+  Yellow = quality, Blue = data counter.
+- Every format (TS, HLS, MP4, MKV, AC3, HEVC...) plays in Samsung's own player. Data usage of
+  streams is estimated from their bit rate.

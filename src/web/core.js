@@ -236,7 +236,20 @@
 
   // Downloads a whole response, counting its bytes. On a TV, an https:// address on a port that
   // only speaks http is retried over http (the relay does the same in a browser).
+  const nativeHosts = new Set(); // TV: servers that refuse the app's own requests
+  const hostOf = (u) => {
+    try {
+      return new URL(u).host;
+    } catch {
+      return '';
+    }
+  };
   async function request(url, { sid = '', timeout = 45_000, headers } = {}) {
+    // TV: read with the TV's download manager (tizen.js), which isn't bound by CORS
+    const native = (u) => api.web.nativeGet(u, { headers, timeout, onBytes: (n) => usage.add(sid, n) }).then((r) => {
+      nativeHosts.add(hostOf(u));
+      return { ...r, relayError: '', finalUrl: u };
+    });
     const attempt = async (u) => {
       const ctrl = new AbortController();
       const timer = setTimeout(() => ctrl.abort(), timeout);
@@ -249,12 +262,33 @@
         clearTimeout(timer);
       }
     };
-    try {
-      return await attempt(url);
-    } catch (e) {
-      if (!RELAY && /^https:/i.test(url) && e.name !== 'AbortError') return attempt(url.replace(/^https:/i, 'http:'));
-      throw e;
+    // the address as given, then (no relay) the same over http for https:// on a plain-http port
+    const candidates = !RELAY && /^https:/i.test(url) ? [url, url.replace(/^https:/i, 'http:')] : [url];
+    let last;
+    for (const u of candidates) {
+      if (api.web.nativeGet && nativeHosts.has(hostOf(u))) {
+        try {
+          return await native(u);
+        } catch (e) {
+          last = e;
+          continue;
+        }
+      }
+      try {
+        return await attempt(u);
+      } catch (e) {
+        last = e;
+        if (e.name === 'AbortError') break;
+      }
+      if (api.web.nativeGet) {
+        try {
+          return await native(u);
+        } catch (e) {
+          last = e;
+        }
+      }
     }
+    throw last;
   }
   const text = (r) => new TextDecoder().decode(r.buf);
   function networkError(e, prefix) {
@@ -510,23 +544,34 @@
     async load(channels) {
       const wanted = new Set(channels.map((c) => c.epg_channel_id).filter(Boolean));
       const names = new Set(channels.map((c) => norm(c.name)));
-      const res = await fetch(remote(this.url));
-      if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
-      let reader = res.body.getReader();
+      let body;
+      let counted = false;
+      try {
+        const res = await fetch(remote(this.url));
+        if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+        body = res.body;
+      } catch (e) {
+        if (!api.web.nativeGet) throw e;
+        // TV: the guide's server refuses the app; the TV's download manager reads it instead
+        const r = await api.web.nativeGet(this.url, { timeout: 180_000, onBytes: (n) => usage.add('', n) });
+        body = new Response(r.buf).body;
+        counted = true;
+      }
+      let reader = body.getReader();
       let first = await reader.read();
       const gz = !first.done && first.value[0] === 0x1f && first.value[1] === 0x8b;
       // counted as it downloads (compressed size), then unzipped if needed
       let stream = new ReadableStream({
         start(ctrl) {
           if (!first.done) {
-            usage.add('', first.value.byteLength);
+            if (!counted) usage.add('', first.value.byteLength);
             ctrl.enqueue(first.value);
           }
         },
         pull(ctrl) {
           return reader.read().then(({ done, value }) => {
             if (done) return ctrl.close();
-            usage.add('', value.byteLength);
+            if (!counted) usage.add('', value.byteLength);
             ctrl.enqueue(value);
           });
         },
@@ -884,8 +929,15 @@
     onWindowState: (fn) => on('window-state', fn),
     reloadApp: async () => location.reload(),
 
-    // What the player does differently here (see player.js)
+    // What the player does differently here (see player.js); tizen.js adds the TV parts.
     web: {
+      // TV player (AVPlay) estimates its own data usage
+      count: (url, n) => usage.add(watched.get(url) || '', n),
+      // the User-Agent a stream needs (M3U #EXTVLCOPT, otherwise the one in the settings)
+      userAgentFor: (url) => {
+        for (const p of playback.values()) if (p.url === url) return (p.headers && p.headers.ua) || userAgent();
+        return userAgent();
+      },
       // hls.js: every request goes through the relay in a browser, and its bytes are counted
       hlsConfig: (sid) => ({
         xhrSetup(xhr, url) {

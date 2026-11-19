@@ -17,6 +17,7 @@ document.documentElement.classList.add(RTL ? 'rtl' : 'ltr');
 const LOCALE = RTL ? 'ar-EG-u-nu-latn' : 'en-GB';
 
 const EN = {
+  "على التلفزيون كل الصيغ (MKV، صوت AC3/DTS، HEVC…) بتشتغل بمشغل سامسونج نفسه، واستهلاكها بيتحسب بالتقريب من سرعة البث.": "On the TV every format (MKV, AC3/DTS audio, HEVC…) plays in Samsung's own player, and its data usage is estimated from the stream's bit rate.",
   "تلقائي: حسب الجهاز — كمبيوتر أو موبايل أو تلفزيون.": "Automatic: from the device — computer, phone or TV.",
   "كمبيوتر (كيبورد وماوس)": "Computer (keyboard and mouse)",
   "في المتصفح مفيش وضع توافق: الصيغ اللي المتصفح مش بيشغلها (MKV، صوت AC3/DTS…) محتاجة برنامج الكمبيوتر أو الموبايل.": "There's no compatibility mode in a browser: formats the browser can't play (MKV, AC3/DTS audio…) need the desktop or mobile app.",

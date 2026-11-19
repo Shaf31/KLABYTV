@@ -176,8 +176,8 @@ async function accountsView(root, params) {
         tabs,
         h('p.muted', t('رابط قائمة M3U من مزود الخدمة، أو ملف M3U على الجهاز. دليل البرامج (EPG) بيتحمّل لوحده لو القائمة فيها رابط XMLTV.')),
         m3uUrl.el,
-        h('div.or', h('span', t('أو'))),
-        filePicker,
+        S.platform === 'tizen' ? null : h('div.or', h('span', t('أو'))),
+        S.platform === 'tizen' ? null : filePicker, // TVs have no file picker
         m3uName.el,
         submit,
         msg,
@@ -807,6 +807,8 @@ async function settingsView(root) {
           selectBox([['ts', 'MPEG-TS'], ['m3u8', 'HLS']], liveFmt, (v) => save({ liveFormat: (liveFmt = v) }))),
         h('div.setting-desc', { style: { marginTop: '10px' } }, S.platform === 'android'
           ? t('أي فيلم أو قناة صيغتها مش مدعومة في المشغل العادي (MKV، صوت AC3/DTS، HEVC…) بيتفتح لوحده في مشغل أندرويد الأصلي، والاستهلاك بيتحسب برضه.')
+          : S.platform === 'tizen'
+          ? t('على التلفزيون كل الصيغ (MKV، صوت AC3/DTS، HEVC…) بتشتغل بمشغل سامسونج نفسه، واستهلاكها بيتحسب بالتقريب من سرعة البث.')
           : S.platform === 'web'
           ? t('في المتصفح مفيش وضع توافق: الصيغ اللي المتصفح مش بيشغلها (MKV، صوت AC3/DTS…) محتاجة برنامج الكمبيوتر أو الموبايل.')
           : t('أي فيلم أو قناة صيغتها مش مدعومة (MKV، صوت AC3/DTS، HEVC…) بيتحول تلقائيًا لـ"وضع التوافق" ويشتغل جوه البرنامج.')),
@@ -821,7 +823,7 @@ async function settingsView(root) {
         settingRow(t('مدة البافر (الأفلام والمسلسلات)'), t('البرنامج بيحمّل قدامك المدة دي بس، ولو قدّمت أو رجعت بيبدأ من المكان الجديد. أقل = توفير أكتر، بس لو النت بيقطع ممكن يقف يحمّل. البث المباشر مش داخل في ده.'),
           selectBox([[30, t('30 ثانية')], [60, t('دقيقة')], [120, t('دقيقتين')], [300, t('5 دقايق')]], S.settings.bufferSeconds || 60, (v) => save({ bufferSeconds: Number(v) }), { 'data-key': 'buffer' })),
         S.platform === 'web' ? h('div.setting-desc', t('في المتصفح البافر ده بيمشي على قنوات وأفلام HLS و TS بس؛ أفلام MP4 المتصفح بيحمّلها بطريقته، واستهلاكها بيتحسب بالتقريب.')) : null,
-        settingRow(t('وقّف التشغيل لما البرنامج يتصغّر'), S.platform === 'android'
+        settingRow(t('وقّف التشغيل لما البرنامج يتصغّر'), S.platform === 'android' || S.platform === 'tizen'
           ? t('البث بيقف لما تخرج من التطبيق أو تقفل الشاشة، وبيكمّل لوحده لما ترجعله.')
           : S.platform === 'web'
           ? t('البث بيقف لما تروح لتاب تانية أو تصغّر المتصفح، وبيكمّل لوحده لما ترجعله.')
@@ -840,7 +842,7 @@ async function settingsView(root) {
         h('div.setting-desc', t('بعض السيرفرات بتطلب قيمة معينة.')),
         h('div.row', ua, h('button.btn.btn-red.focusable', { onclick: () => save({ userAgent: ua.value.trim() }) }, t('حفظ'))),
       ),
-      S.platform === 'android' ? null : h('section.settings-card', h('h2', t('اختصارات الكيبورد والماوس')),
+      S.platform === 'android' || S.platform === 'tizen' ? null : h('section.settings-card', h('h2', t('اختصارات الكيبورد والماوس')),
         h('table.keys', h('tbody', ...keys.map(([k, v]) => h('tr', h('td', h('kbd', k)), h('td', v)))))),
     ),
   );

@@ -747,3 +747,8 @@ html[dir=rtl] .hero-title, html[dir=rtl] .hero-plot, html[dir=rtl] .ep-title, ht
 .btn-pair { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
 body.ui-mobile .btn-pair { justify-content: stretch; }
 body.ui-mobile .btn-pair .btn { flex: 1; }
+
+/* ---------- Samsung TV app: AVPlay draws the picture under the page (src/web/tizen.js) ---------- */
+object.avplay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+html.avplay-on, html.avplay-on body, html.avplay-on #view, html.avplay-on .player { background: transparent !important; }
+body.os-tizen .p-full { display: none; } /* the TV app is always full screen */

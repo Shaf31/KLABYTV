@@ -31,7 +31,8 @@ async function playerView(root, p) {
   const pos = () => (seekTarget != null ? seekTarget : (compat ? offset : 0) + (video.currentTime || 0));
   const dur = () => (compat ? (compatInfo && compatInfo.duration) || NaN : video.duration);
 
-  const video = h('video', { autoplay: true, playsinline: true });
+  // Samsung TV: Samsung's own player (AVPlay) behind a stand-in <video> (src/web/tizen.js)
+  const video = web && web.createVideo ? web.createVideo() : h('video', { autoplay: true, playsinline: true });
   video.volume = store.get('player:volume', 1);
   video.muted = store.get('player:muted', false);
 
@@ -134,7 +135,7 @@ async function playerView(root, p) {
       pl.attachMediaElement(video);
       pl.load();
       engine = mpegtsEngine(pl);
-    } else if (format === 'm3u8' && window.Hls && Hls.isSupported()) {
+    } else if (format === 'm3u8' && !(web && web.nativeOnly) && window.Hls && Hls.isSupported()) {
       // Movies/episodes keep exactly bufferSec ahead (settings); live keeps hls.js' default 30s.
       const bufferCfg = isLive ? { maxBufferLength: 30 } : { maxBufferLength: bufferSec, maxMaxBufferLength: bufferSec, backBufferLength: 30 };
       const hls = new Hls({ enableWorker: true, ...bufferCfg, fragLoadingMaxRetry: 6, manifestLoadingMaxRetry: 3, ...(web ? web.hlsConfig(sid) : {}) });
@@ -154,7 +155,7 @@ async function playerView(root, p) {
       hls.loadSource(url);
       hls.attachMedia(video);
       engine = { destroy: () => hls.destroy() };
-    } else if (format === 'ts' && window.mpegts && mpegts.isSupported()) {
+    } else if (format === 'ts' && !(web && web.nativeOnly) && window.mpegts && mpegts.isSupported()) {
       const pl = mpegts.createPlayer(
         { type: 'mpegts', isLive, url },
         {

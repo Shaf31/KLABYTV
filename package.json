@@ -7,6 +7,7 @@
   "scripts": {
     "start": "electron .",
     "web": "node src/web/server.js",
+    "dist:tizen": "node scripts/build-tizen.js",
     "dist": "electron-builder",
     "dist:win": "electron-builder --win",
     "dist:mac": "electron-builder --mac --universal",
@@ -23,6 +24,8 @@
   "devDependencies": {
     "electron": "33.2.1",
     "electron-builder": "25.1.8",
+    "esbuild": "^0.24.0",
+    "lightningcss": "^1.28.2",
     "resedit": "^2.0.3"
   },
   "build": {
